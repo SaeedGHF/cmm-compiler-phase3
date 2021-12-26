@@ -41,7 +41,7 @@ public class TypeChecker extends Visitor<Void> {
         top = new Scope();
         scopes = new Stack<>();
         expressionTypeChecker = new ExpressionTypeChecker();
-        returnIdentifier = new Identifier("RETURN");
+        returnIdentifier = new Identifier("RET");
         declarationPermitted = false;
     }
 
@@ -283,8 +283,8 @@ public class TypeChecker extends Visitor<Void> {
         return null;
     }
 
-    private void pushScope(SymbolTable pre) {
-        SymbolTable.push(new SymbolTable(pre));
+    private void pushScope(SymbolTable prev) {
+        SymbolTable.push(new SymbolTable(prev));
         top = new Scope();
         scopes.push(top);
     }
@@ -333,11 +333,11 @@ public class TypeChecker extends Visitor<Void> {
         if (a instanceof StructType) {
             return recursiveCompare((StructType) a, (StructType) b);
         }
-        if (a instanceof ListType) {
-            return recursiveCompare((ListType) a, (ListType) b);
-        }
         if (a instanceof FptrType) {
             return recursiveCompare((FptrType) a, (FptrType) b);
+        }
+        if (a instanceof ListType) {
+            return recursiveCompare((ListType) a, (ListType) b);
         }
         return true;
     }
@@ -347,9 +347,9 @@ public class TypeChecker extends Visitor<Void> {
     }
 
     private boolean recursiveCompare(FptrType a, FptrType b) {
-        if (a.getArgsType().size() != b.getArgsType().size())
-            return false;
         if (!recursiveCompare(a.getReturnType(), b.getReturnType()))
+            return false;
+        if (a.getArgsType().size() != b.getArgsType().size())
             return false;
         for (int i = 0; i < a.getArgsType().size(); i++) {
             if (!recursiveCompare(a.getArgsType().get(i), b.getArgsType().get(i)))

@@ -110,23 +110,20 @@ public class ExpressionTypeChecker extends Visitor<Type> {
             funcCall.addError(new CallOnNoneFptrType(funcCall.getLine()));
             return new NoType();
         }
-        if (((FptrType) instance).getReturnType() instanceof VoidType && !is_stmt) {
-            funcCall.addError(new CantUseValueOfVoidFunction(funcCall.getLine()));
-        }
-        is_stmt = false;
         ArrayList<Type> args = new ArrayList<>();
         for (Expression arg : funcCall.getArgs()) {
             Type item = arg.accept(this);
             args.add(item);
         }
-        if (args.size() != ((FptrType) instance).getArgsType().size()) {
+        if (args.size() != ((FptrType) instance).getArgsType().size() ||
+                !compareTypeArrayList(((FptrType) instance).getArgsType(), args)) {
             funcCall.addError(new ArgsInFunctionCallNotMatchDefinition(funcCall.getLine()));
-            return ((FptrType) instance).getReturnType();
+            //return ((FptrType) instance).getReturnType();
         }
-        if (!compareTypeArrayList(((FptrType) instance).getArgsType(), args)) {
-            funcCall.addError(new ArgsInFunctionCallNotMatchDefinition(funcCall.getLine()));
-            return ((FptrType) instance).getReturnType();
+        if (((FptrType) instance).getReturnType() instanceof VoidType && !is_stmt) {
+            funcCall.addError(new CantUseValueOfVoidFunction(funcCall.getLine()));
         }
+        is_stmt = false;
         return ((FptrType) instance).getReturnType();
     }
 
